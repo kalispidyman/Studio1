@@ -1,0 +1,86 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/container-queries";
+
+@theme {
+  --color-on-primary-container: #45435f;
+  --color-primary-container: #b4b1d2;
+  --color-surface-variant: #353438;
+  --color-on-primary-fixed: #1a1932;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-surface-container-lowest: #0e0e11;
+  --color-secondary-fixed-dim: #b8ccb7;
+  --color-on-primary: #2f2e48;
+  --color-on-surface-variant: #c8c5ce;
+  --color-surface: #131316;
+  --color-on-secondary-fixed: #0f1f12;
+  --color-inverse-surface: #e4e1e6;
+  --color-background: #131316;
+  --color-surface-dim: #131316;
+  --color-tertiary-fixed-dim: #cac4d2;
+  --color-on-secondary: #243426;
+  --color-on-secondary-container: #a7baa6;
+  --color-on-background: #e4e1e6;
+  --color-inverse-on-surface: #303033;
+  --color-secondary-fixed: #d4e8d2;
+  --color-primary-fixed-dim: #c6c3e5;
+  --color-surface-container: #1f1f22;
+  --color-outline: #928f98;
+  --color-secondary-container: #3a4b3b;
+  --color-on-tertiary: #322f39;
+  --color-tertiary-fixed: #e7e0ee;
+  --color-surface-bright: #39393c;
+  --color-on-surface: #e4e1e6;
+  --color-tertiary: #d4cddb;
+  --color-primary-fixed: #e3dfff;
+  --color-error: #ffb4ab;
+  --color-surface-tint: #c6c3e5;
+  --color-on-tertiary-container: #48444f;
+  --color-secondary: #b8ccb7;
+  --color-on-tertiary-fixed-variant: #494550;
+  --color-inverse-primary: #5d5b78;
+  --color-primary: #d0ccee;
+  --color-surface-container-highest: #353438;
+  --color-on-primary-fixed-variant: #454460;
+  --color-surface-container-low: #1b1b1e;
+  --color-on-tertiary-fixed: #1d1a24;
+  --color-outline-variant: #47464d;
+  --color-on-secondary-fixed-variant: #3a4b3b;
+  --color-surface-container-high: #2a2a2d;
+  --color-on-error-container: #ffdad6;
+  --color-tertiary-container: #b8b2bf;
+
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+
+  --font-headline: 'Manrope', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+  --font-label: 'Inter', sans-serif;
+}
+
+@layer base {
+  body { 
+    background-color: var(--color-background, #131316); 
+    overflow-x: hidden; 
+    color: var(--color-on-background, #e4e1e6); 
+  } 
+}
+
+@layer utilities {
+  .glass-pearl { 
+    background: radial-gradient(circle at 30% 30%, rgba(208, 204, 238, 0.15), rgba(184, 204, 183, 0.05)); 
+    backdrop-filter: blur(40px); 
+    border: 1px solid rgba(255, 255, 255, 0.03); 
+  } 
+  .orb-glow { 
+    filter: blur(120px); 
+    opacity: 0.4; 
+  } 
+}
+
+.material-symbols-outlined { 
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; 
+}
