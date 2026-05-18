@@ -25,16 +25,16 @@ export default function ContactPage() {
         <h1 className="text-3xl md:text-5xl font-headline font-black text-white uppercase tracking-tight mb-2">
           Ethereal Network
         </h1>
-        
+
         <p className="text-neutral-400 text-xs md:text-sm max-w-lg mb-10 leading-relaxed">
           Establish a secure connection. Reach out for high-end spatial visualizers, immersive 3D interfaces, and modern engineering design inquiries.
         </p>
 
         {/* Grid layout for contacts */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mb-10">
-          
+
           {/* Email Card */}
-          <a 
+          <a
             href="mailto:neet@ethereal.studio"
             className="flex items-center gap-4 p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
           >
@@ -43,7 +43,7 @@ export default function ContactPage() {
             </div>
             <div>
               <div className="text-[9px] text-neutral-500 uppercase font-bold tracking-wider mb-0.5">Direct Email</div>
-              <div className="text-xs text-white font-semibold font-mono">neet@ethereal.studio</div>
+              <div className="text-xs text-white font-semibold font-mono">antineet78@gmail.com</div>
             </div>
           </a>
 
@@ -59,7 +59,7 @@ export default function ContactPage() {
           </div>
 
           {/* GitHub Card */}
-          <a 
+          <a
             href="https://github.com/raagneet"
             target="_blank"
             rel="noreferrer"
@@ -97,7 +97,7 @@ export default function ContactPage() {
           >
             Send Direct Message
           </motion.a>
-          
+
           <Link href="/" className="w-full sm:w-auto">
             <motion.div
               whileHover={{ scale: 1.03 }}
