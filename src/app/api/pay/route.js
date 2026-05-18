@@ -19,7 +19,13 @@ export async function POST(req) {
     const appId = process.env.CASHFREE_APP_ID;
     const secretKey = process.env.CASHFREE_SECRET_KEY;
     const apiBaseUrl = process.env.CASHFREE_API_URL || "https://sandbox.cashfree.com/pg";
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+    // Cashfree strictly requires secure HTTPS for return_url in both Sandbox and Live
+    if (baseUrl.startsWith("http://")) {
+      console.log("[Cashfree Pay] Non-secure base URL detected. Enforcing secure production HTTPS return URL.");
+      baseUrl = "https://neetstudios.vercel.app";
+    }
 
     if (!appId || !secretKey) {
       console.error("[Cashfree Pay] Missing credentials in server environment variables.");
@@ -29,11 +35,13 @@ export async function POST(req) {
       );
     }
 
-    // 3. Define the return redirect url
-    // Cashfree automatically interpolates {order_id} in the return_url parameter
-    const returnUrl = `${baseUrl}/payment-success?order_id={order_id}`;
+    // 3. Cashfree requires a unique order ID per request
+    const orderId = `order_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
 
-    // 4. Clean customer credentials for Cashfree compatibility
+    // 4. Define the return redirect url with the actual order ID interpolated
+    const returnUrl = `${baseUrl}/payment-success?order_id=${orderId}`;
+
+    // 5. Clean customer credentials for Cashfree compatibility
     // Cashfree requires a valid customer ID (alphanumeric with underscores)
     const customerId = `cust_${email.replace(/[^a-zA-Z0-9]/g, "_")}`;
     
@@ -41,10 +49,7 @@ export async function POST(req) {
     const cleanPhone = phone ? phone.replace(/[^0-9]/g, "").slice(-10) : "9999999999";
     const finalPhone = cleanPhone.length === 10 ? cleanPhone : "9999999999";
 
-    // Cashfree requires a unique order ID per request
-    const orderId = `order_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
-
-    // 5. Construct Cashfree PG API Order request payload
+    // 5. Construct Cashfree PG API Order request payload (v2021-05-21 compatible)
     const payload = {
       order_amount: Number(amount),
       order_currency: "INR",
@@ -62,15 +67,15 @@ export async function POST(req) {
       order_note: purpose
     };
 
-    console.log(`[Cashfree Pay] Initializing order ${orderId} for ₹${amount} - ${purpose}...`);
+    console.log(`[Cashfree Pay] Initializing order ${orderId} for ₹${amount} - ${purpose} using v2021-05-21 PG API...`);
 
-    // 6. Execute server-to-server request to Cashfree v3 PG Orders API
+    // 6. Execute server-to-server request to Cashfree PG Orders API using v2021-05-21 backward compatibility
     const response = await fetch(`${apiBaseUrl.replace(/\/$/, "")}/orders`, {
       method: "POST",
       headers: {
         "x-client-id": appId,
         "x-client-secret": secretKey,
-        "x-api-version": "2023-08-01",
+        "x-api-version": "2021-05-21",
         "Content-Type": "application/json"
       },
       body: JSON.stringify(payload)
@@ -81,7 +86,7 @@ export async function POST(req) {
     try {
       data = JSON.parse(responseText);
     } catch (e) {
-      console.error("[Cashfree Pay] Failed to parse response from Cashfree:", responseText);
+      console.error("[Cashfree Pay] Failed to parse response from Cashfree PG Orders API:", responseText);
       return NextResponse.json(
         { error: "Invalid response from the payment gateway partner." },
         { status: 502 }
@@ -89,14 +94,14 @@ export async function POST(req) {
     }
 
     if (!response.ok) {
-      console.error("[Cashfree Pay] Cashfree API Error Response:", data);
+      console.error("[Cashfree Pay] Cashfree PG Orders API Error Response:", data);
       return NextResponse.json(
         { error: data.message || "Payment initialization failed on the gateway side." },
         { status: response.status }
       );
     }
 
-    // 7. Extract hosted checkout link
+    // 7. Extract the shareable hosted checkout link
     const paymentUrl = data.payment_link;
 
     if (!paymentUrl) {
@@ -110,8 +115,8 @@ export async function POST(req) {
     return NextResponse.json({
       success: true,
       payment_url: paymentUrl,
-      order_id: data.order_id,
-      cf_order_id: data.cf_order_id
+      order_id: orderId,
+      cf_order_id: data.cf_order_id || ""
     });
 
   } catch (error) {

@@ -17,44 +17,45 @@ export default function SubscriptionsPage() {
 
   const plans = [
     {
-      name: "Basic Developer",
-      price: "499",
+      name: "Basic Development",
+      price: "1",
       description: "Perfect for individuals and solo developers looking for premium spatial components.",
       features: [
-        "Access to 5 Core 3D Modules",
-        "Community Discord Access",
-        "Regular Weekly Asset Updates",
-        "Standard Speed CDN Delivery"
+        "3 page website",
+        "static animations",
+        "security",
+        "customer support"
       ],
       isPopular: false,
       color: "from-blue-500/20 to-indigo-500/20",
       accent: "text-blue-400"
     },
     {
-      name: "Studio Pro",
-      price: "999",
+      name: "Plus Plan",
+      price: "1",
       description: "Ideal for fast-growing freelance businesses and modern web design agencies.",
       features: [
-        "Unlimited Immersive Scenes",
-        "Priority Developer Support",
-        "Custom Domain Binding",
-        "Commercial Licensing Included",
-        "Zero Branded Watermarks"
+        "5 page website",
+        "animations",
+        "effects hover efffects",
+        "scroll effects"
       ],
       isPopular: true,
       color: "from-primary/20 to-purple-500/20",
       accent: "text-primary"
     },
     {
-      name: "Enterprise Lab",
-      price: "1499",
+      name: "Ultra Development",
+      price: "1",
       description: "Custom tailor-made integration pipelines and advanced spatial visualizers.",
       features: [
-        "Dedicated R3F Engineer",
-        "24/7 Phone & Slack Support",
-        "Custom Shader Pipeline Design",
-        "White-label Dashboard Console",
-        "Unlimited Team Seat Invites"
+        "7 page website",
+        "landing page",
+        "home page",
+        "error 404 page",
+        "secure",
+        "email integrated",
+        "and much more"
       ],
       isPopular: false,
       color: "from-emerald-500/20 to-teal-500/20",
@@ -73,7 +74,13 @@ export default function SubscriptionsPage() {
   };
 
   const handleFormChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    if (name === "phone") {
+      const cleaned = value.replace(/[^0-9]/g, "").slice(0, 10);
+      setFormData(prev => ({ ...prev, [name]: cleaned }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleCheckoutSubmit = async (e) => {
@@ -81,9 +88,15 @@ export default function SubscriptionsPage() {
     setCheckoutLoading(true);
     setCheckoutError(null);
 
+    if (formData.phone && formData.phone.length !== 10) {
+      setCheckoutError("Phone number must be exactly 10 digits.");
+      setCheckoutLoading(false);
+      return;
+    }
+
     try {
       // 1. Fire asynchronous POST request directly to the backend payment route
-      const response = await fetch("/api/pay", {
+      const response = await fetch("/api/pay/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -267,7 +280,7 @@ export default function SubscriptionsPage() {
                 <input 
                   type="tel" 
                   name="phone"
-                  placeholder="e.g. +91 9999999999"
+                  placeholder="e.g. 9876543210 (10 digits)"
                   value={formData.phone}
                   onChange={handleFormChange}
                   disabled={checkoutLoading}

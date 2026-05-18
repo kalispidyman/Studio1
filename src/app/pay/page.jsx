@@ -6,8 +6,8 @@ import { Shield, Loader2, ArrowRight, Sparkles } from "lucide-react";
 
 function CheckoutForm() {
   const searchParams = useSearchParams();
-  const defaultAmount = searchParams.get("amount") || "499";
-  const defaultPurpose = searchParams.get("purpose") || "Basic Plan";
+  const defaultAmount = searchParams.get("amount") || "1";
+  const defaultPurpose = searchParams.get("purpose") || "Basic Development";
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -30,7 +30,13 @@ function CheckoutForm() {
   }, [searchParams]);
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    if (name === "phone") {
+      const cleaned = value.replace(/[^0-9]/g, "").slice(0, 10);
+      setFormData(prev => ({ ...prev, [name]: cleaned }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handlePayment = async (e) => {
@@ -38,9 +44,15 @@ function CheckoutForm() {
     setLoading(true);
     setError(null);
 
+    if (formData.phone && formData.phone.length !== 10) {
+      setError("Phone number must be exactly 10 digits.");
+      setLoading(false);
+      return;
+    }
+
     try {
       // Execute a server-to-server request to the local API endpoint
-      const response = await fetch("/api/pay", {
+      const response = await fetch("/api/pay/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,7 +120,7 @@ function CheckoutForm() {
         <input 
           type="tel" 
           name="phone"
-          placeholder="e.g. +91 9999999999"
+          placeholder="e.g. 9876543210 (10 digits)"
           value={formData.phone}
           onChange={handleChange}
           disabled={loading}

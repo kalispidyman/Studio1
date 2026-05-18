@@ -159,7 +159,7 @@ const Hero = () => {
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-[0.15em] text-white font-headline text-center leading-tight">
             <TextType
               text={"ETHEREAL\nSTUDIOS"}
-              typingSpeed={100}
+              typingSpeed={250}
               showCursor={false}
             />
           </h1>

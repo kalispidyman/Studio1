@@ -27,7 +27,7 @@ export async function GET(req) {
       headers: {
         "x-client-id": appId,
         "x-client-secret": secretKey,
-        "x-api-version": "2023-08-01",
+        "x-api-version": "2021-05-21",
         "Content-Type": "application/json"
       }
     });

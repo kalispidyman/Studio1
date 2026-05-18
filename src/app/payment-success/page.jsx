@@ -22,40 +22,50 @@ function SuccessContent() {
     return () => clearInterval(interval);
   }, [verificationState]);
 
-  // Synchronous server-side verification check
+  // Synchronous server-side verification check with robust polling retry mechanism
   useEffect(() => {
     if (!orderId) {
       setVerificationState("failed");
       return;
     }
 
+    let attempts = 0;
+    const maxAttempts = 6;
+    let timeoutId;
+
     const verifyTransaction = async () => {
       try {
-        console.log(`[Cashfree Client] Querying status for order ${orderId}...`);
+        attempts++;
+        console.log(`[Cashfree Client] Querying status for order ${orderId} (Attempt ${attempts}/${maxAttempts})...`);
         
         // Fetch direct live status verification from our backend api
-        const res = await fetch(`/api/verify-payment?order_id=${orderId}`);
+        const res = await fetch(`/api/verify-payment/?order_id=${orderId}`);
         const data = await res.json();
 
         if (res.ok && data.isPaid) {
           setOrderDetails(data);
           setVerificationState("success");
+        } else if (attempts < maxAttempts) {
+          console.warn(`[Cashfree Client] Order not paid yet, retrying in 2 seconds...`, data);
+          timeoutId = setTimeout(verifyTransaction, 2000);
         } else {
-          console.warn("[Cashfree Client] Verification returned unpaid state:", data);
+          console.error("[Cashfree Client] Max verification attempts reached. Transaction failed.", data);
           setVerificationState("failed");
         }
       } catch (error) {
         console.error("[Cashfree Client] Network error checking status:", error);
-        setVerificationState("failed");
+        if (attempts < maxAttempts) {
+          timeoutId = setTimeout(verifyTransaction, 2000);
+        } else {
+          setVerificationState("failed");
+        }
       }
     };
 
-    // Add a slight natural delay so the micro-animations shimmer elegantly
-    const timer = setTimeout(() => {
-      verifyTransaction();
-    }, 1800);
+    // Initial check delay (1.5s) for standard network propagation
+    timeoutId = setTimeout(verifyTransaction, 1500);
 
-    return () => clearTimeout(timer);
+    return () => clearTimeout(timeoutId);
   }, [orderId]);
 
   if (verificationState === "verifying") {
