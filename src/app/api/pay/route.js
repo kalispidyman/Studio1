@@ -14,52 +14,64 @@ export async function POST(req) {
     }
 
     // 2. Load configurations from environment variables
-    const apiKey = process.env.INSTAMOJO_API_KEY;
-    const authToken = process.env.INSTAMOJO_AUTH_TOKEN;
-    const apiBaseUrl = process.env.INSTAMOJO_API_URL || "https://test.instamojo.com/api/v2/";
+    const appId = process.env.CASHFREE_APP_ID;
+    const secretKey = process.env.CASHFREE_SECRET_KEY;
+    const apiBaseUrl = process.env.CASHFREE_API_URL || "https://sandbox.cashfree.com/pg";
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-    if (!apiKey || !authToken) {
-      console.error("[Instamojo Pay] Missing API keys in server environment variables.");
+    if (!appId || !secretKey) {
+      console.error("[Cashfree Pay] Missing credentials in server environment variables.");
       return NextResponse.json(
-        { error: "Server misconfiguration: Payment keys are not loaded." },
+        { error: "Server misconfiguration: Payment credentials are not loaded." },
         { status: 500 }
       );
     }
 
-    // 3. Define the return and webhook URLs
-    // The redirect_url points to our beautiful payment success feedback view
-    const redirectUrl = `${baseUrl}/payment-success/`;
+    // 3. Define the return redirect url
+    // Cashfree automatically interpolates {order_id} in the return_url parameter
+    const returnUrl = `${baseUrl}/payment-success?order_id={order_id}`;
+
+    // 4. Clean customer credentials for Cashfree compatibility
+    // Cashfree requires a valid customer ID (alphanumeric with underscores)
+    const customerId = `cust_${email.replace(/[^a-zA-Z0-9]/g, "_")}`;
     
-    // The webhook points to our secure backend webhook route for automation
-    const webhookUrl = `${baseUrl}/api/webhook/instamojo/`;
+    // Cashfree requires a valid 10-digit phone number
+    const cleanPhone = phone ? phone.replace(/[^0-9]/g, "").slice(-10) : "9999999999";
+    const finalPhone = cleanPhone.length === 10 ? cleanPhone : "9999999999";
 
-    // 4. Construct the URL-encoded payload for Instamojo payment request
-    const payload = new URLSearchParams({
-      amount: String(amount),
-      purpose: purpose,
-      buyer_name: name,
-      email: email,
-      redirect_url: redirectUrl,
-      webhook: webhookUrl,
-      allow_repeated_payments: "false"
-    });
+    // Cashfree requires a unique order ID per request
+    const orderId = `order_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
 
-    if (phone) {
-      payload.append("phone", phone);
-    }
+    // 5. Construct Cashfree PG API Order request payload
+    const payload = {
+      order_amount: Number(amount),
+      order_currency: "INR",
+      order_id: orderId,
+      customer_details: {
+        customer_id: customerId,
+        customer_name: name,
+        customer_email: email,
+        customer_phone: finalPhone
+      },
+      order_meta: {
+        return_url: returnUrl,
+        notify_url: `${baseUrl}/api/webhook/cashfree`
+      },
+      order_note: purpose
+    };
 
-    console.log(`[Instamojo Pay] Initializing payment request for ${email} - ₹${amount} for ${purpose}...`);
+    console.log(`[Cashfree Pay] Initializing order ${orderId} for ₹${amount} - ${purpose}...`);
 
-    // 5. Execute the server-to-server HTTP request to Instamojo v2 API
-    const response = await fetch(`${apiBaseUrl.replace(/\/$/, "")}/payment_requests/`, {
+    // 6. Execute server-to-server request to Cashfree v3 PG Orders API
+    const response = await fetch(`${apiBaseUrl.replace(/\/$/, "")}/orders`, {
       method: "POST",
       headers: {
-        "X-Api-Key": apiKey,
-        "X-Auth-Token": authToken,
-        "Content-Type": "application/x-www-form-urlencoded"
+        "x-client-id": appId,
+        "x-client-secret": secretKey,
+        "x-api-version": "2023-08-01",
+        "Content-Type": "application/json"
       },
-      body: payload.toString()
+      body: JSON.stringify(payload)
     });
 
     const responseText = await response.text();
@@ -67,7 +79,7 @@ export async function POST(req) {
     try {
       data = JSON.parse(responseText);
     } catch (e) {
-      console.error("[Instamojo Pay] Failed to parse response from Instamojo:", responseText);
+      console.error("[Cashfree Pay] Failed to parse response from Cashfree:", responseText);
       return NextResponse.json(
         { error: "Invalid response from the payment gateway partner." },
         { status: 502 }
@@ -75,21 +87,20 @@ export async function POST(req) {
     }
 
     if (!response.ok) {
-      console.error("[Instamojo Pay] Instamojo v2 API Error Response:", data);
+      console.error("[Cashfree Pay] Cashfree API Error Response:", data);
       return NextResponse.json(
         { error: data.message || "Payment initialization failed on the gateway side." },
         { status: response.status }
       );
     }
 
-    // 6. Return the checkout URL back to the frontend client
-    // Instamojo returns longurl in the payment_request object
-    const paymentUrl = data.payment_request?.longurl;
+    // 7. Extract hosted checkout link
+    const paymentUrl = data.payment_link;
 
     if (!paymentUrl) {
-      console.error("[Instamojo Pay] longurl was missing in Instamojo response:", data);
+      console.error("[Cashfree Pay] payment_link missing in Cashfree response:", data);
       return NextResponse.json(
-        { error: "Payment URL could not be generated." },
+        { error: "Payment checkout link could not be generated." },
         { status: 500 }
       );
     }
@@ -97,11 +108,12 @@ export async function POST(req) {
     return NextResponse.json({
       success: true,
       payment_url: paymentUrl,
-      payment_request_id: data.payment_request.id
+      order_id: data.order_id,
+      cf_order_id: data.cf_order_id
     });
 
   } catch (error) {
-    console.error("[Instamojo Pay] Server Error in /api/pay handler:", error);
+    console.error("[Cashfree Pay] Server Error in /api/pay handler:", error);
     return NextResponse.json(
       { error: "Internal server error occurred while processing checkout." },
       { status: 500 }

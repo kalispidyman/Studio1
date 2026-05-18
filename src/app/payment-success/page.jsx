@@ -7,11 +7,10 @@ import { CheckCircle, XCircle, Loader2, ArrowRight } from "lucide-react";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
-  const paymentId = searchParams.get("payment_id");
-  const paymentRequestId = searchParams.get("payment_request_id");
-  const paymentStatus = searchParams.get("payment_status");
+  const orderId = searchParams.get("order_id");
 
   const [verificationState, setVerificationState] = useState("verifying"); // verifying | success | failed
+  const [orderDetails, setOrderDetails] = useState(null);
   const [dots, setDots] = useState("");
 
   // Simple loading animation text effect
@@ -23,44 +22,41 @@ function SuccessContent() {
     return () => clearInterval(interval);
   }, [verificationState]);
 
-  // Simulate a verification check
+  // Synchronous server-side verification check
   useEffect(() => {
-    // -------------------------------------------------------------------------
-    // ARCHITECTURE NOTE: Webhook Synchronization Verification
-    // -------------------------------------------------------------------------
-    // Since the payment gateway (Instamojo) communicates with our backend via an 
-    // asynchronous server-to-server webhook (/api/webhook/instamojo), the buyer 
-    // might land here a few milliseconds before the webhook finishes processing the database update.
-    // 
-    // In a fully-production system, you have three highly reliable ways to handle this:
-    // 1. POLLING: Fire a client-side fetch request here to a status verification API:
-    //    const checkStatus = async () => {
-    //      const res = await fetch(`/api/verify-payment?payment_id=${paymentId}`);
-    //      const data = await res.json();
-    //      if (data.isPaid) setVerificationState("success");
-    //    }
-    //
-    // 2. REAL-TIME SUBSCRIPTION (Supabase):
-    //    supabase.channel('users_tier')
-    //      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users' }, payload => {
-    //         if (payload.new.paid_status === 'Paid') setVerificationState("success");
-    //      }).subscribe();
-    //
-    // 3. SECURE PARAMETER VERIFICATION (Standard Fallback):
-    //    Checking if the payment gateway redirected with payment_status=Credit.
-    // -------------------------------------------------------------------------
+    if (!orderId) {
+      setVerificationState("failed");
+      return;
+    }
 
-    const timer = setTimeout(() => {
-      // Instamojo redirects with payment_status=Credit when the payment is successful.
-      if (paymentStatus?.toLowerCase() === "credit") {
-        setVerificationState("success");
-      } else {
+    const verifyTransaction = async () => {
+      try {
+        console.log(`[Cashfree Client] Querying status for order ${orderId}...`);
+        
+        // Fetch direct live status verification from our backend api
+        const res = await fetch(`/api/verify-payment?order_id=${orderId}`);
+        const data = await res.json();
+
+        if (res.ok && data.isPaid) {
+          setOrderDetails(data);
+          setVerificationState("success");
+        } else {
+          console.warn("[Cashfree Client] Verification returned unpaid state:", data);
+          setVerificationState("failed");
+        }
+      } catch (error) {
+        console.error("[Cashfree Client] Network error checking status:", error);
         setVerificationState("failed");
       }
-    }, 1800); // 1.8s delay to show the professional "synchronizing" feedback
+    };
+
+    // Add a slight natural delay so the micro-animations shimmer elegantly
+    const timer = setTimeout(() => {
+      verifyTransaction();
+    }, 1800);
 
     return () => clearTimeout(timer);
-  }, [paymentStatus, paymentId]);
+  }, [orderId]);
 
   if (verificationState === "verifying") {
     return (
@@ -98,12 +94,12 @@ function SuccessContent() {
         {/* Payment Metadata Display */}
         <div className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 mb-8 text-left text-xs font-mono space-y-2">
           <div className="flex justify-between items-center pb-2 border-b border-white/5">
-            <span className="text-neutral-500 uppercase tracking-wider text-[9px]">Receipt ID</span>
-            <span className="text-emerald-400 font-semibold">{paymentId?.substring(0, 16) || "N/A"}</span>
+            <span className="text-neutral-500 uppercase tracking-wider text-[9px]">Order ID</span>
+            <span className="text-emerald-400 font-semibold">{orderId?.substring(0, 22) || "N/A"}</span>
           </div>
-          <div className="flex justify-between items-center pt-1">
-            <span className="text-neutral-500 uppercase tracking-wider text-[9px]">Req Ref</span>
-            <span className="text-neutral-300">{paymentRequestId?.substring(0, 16) || "N/A"}</span>
+          <div className="flex justify-between items-center pt-1 border-b border-white/5 pb-2">
+            <span className="text-neutral-500 uppercase tracking-wider text-[9px]">Amount Paid</span>
+            <span className="text-neutral-300">₹{orderDetails?.amount || "N/A"} INR</span>
           </div>
           <div className="flex justify-between items-center pt-1">
             <span className="text-neutral-500 uppercase tracking-wider text-[9px]">Provision Status</span>

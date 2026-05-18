@@ -156,9 +156,9 @@ const Hero = () => {
             <span className="text-[9px] font-mono uppercase tracking-[0.4em] text-primary/80">Studio.v1</span>
           </div>
 
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-[0.15em] text-white font-headline text-center leading-none">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-[0.15em] text-white font-headline text-center leading-tight">
             <TextType
-              text="ETHEREAL STUDIOS"
+              text={"ETHEREAL\nSTUDIOS"}
               typingSpeed={100}
               showCursor={false}
             />
