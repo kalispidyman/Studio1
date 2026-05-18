@@ -266,12 +266,17 @@ const Footer = () => (
       <span className="md:ml-2 block md:inline mt-2 md:mt-0 font-bold text-[#b8ccb7]">designer @NEET</span>
     </div>
     <div className="flex gap-6 md:gap-8 flex-wrap justify-center">
-      {['Privacy', 'Terms', 'Coordinates'].map(link => (
-        <a key={link} className="font-label text-[10px] uppercase tracking-[0.2em] opacity-40 text-primary hover:opacity-100 hover:text-white transition-all" href="#">
-          {link}
-        </a>
-      ))}
+      <Link href="/terms/" className="font-label text-[10px] uppercase tracking-[0.2em] opacity-40 text-primary hover:opacity-100 hover:text-white transition-all">
+        Terms & Conditions
+      </Link>
+      <Link href="/refund/" className="font-label text-[10px] uppercase tracking-[0.2em] opacity-40 text-primary hover:opacity-100 hover:text-white transition-all">
+        Refund & Cancellation
+      </Link>
+      <Link href="/contact/" className="font-label text-[10px] uppercase tracking-[0.2em] opacity-40 text-primary hover:opacity-100 hover:text-white transition-all">
+        Network
+      </Link>
     </div>
+
     <div className="flex gap-4">
       {['public', 'alternate_email'].map(icon => (
         <motion.div
