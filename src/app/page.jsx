@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef, useState, useEffect } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReactLenis } from 'lenis/react';
 import dynamic from 'next/dynamic';
@@ -18,7 +19,9 @@ const TheatreStudio = dynamic(() => import('../components/TheatreStudio'), { ssr
 import GridScan from '../components/GridScan';
 import CurvedLoop from '../components/CurvedLoop';
 import TEST from '../components/TEST';
-import { User, Zap, Briefcase, Cpu, Globe, X } from 'lucide-react';
+import TextType from '../components/TextType';
+import { User, Zap, Briefcase, Cpu, Globe, X, CreditCard } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,7 +30,7 @@ if (typeof window !== 'undefined') {
   const originalWarn = console.warn;
   console.warn = (...args) => {
     if (args[0] && typeof args[0] === 'string' && (
-      args[0].includes('THREE.Clock') || 
+      args[0].includes('THREE.Clock') ||
       args[0].includes('using deprecated parameters')
     )) return;
     originalWarn(...args);
@@ -42,8 +45,38 @@ const sidebarItems = [
   { id: 'features', label: 'Features', icon: <Zap size={20} /> },
   { id: 'projects', label: 'Projects', icon: <Briefcase size={20} /> },
   { id: 'skills', label: 'Stack', icon: <Cpu size={20} /> },
-  { id: 'contact', label: 'Network', icon: <Globe size={20} /> }
+  { id: 'contact', label: 'Network', icon: <Globe size={20} /> },
+  { id: 'subscriptions', label: 'Plans', icon: <CreditCard size={20} /> }
 ];
+
+const FloatingPlansPanel = () => {
+  return (
+    <motion.div
+      initial={{ x: -100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ delay: 1, duration: 1 }}
+      className="fixed left-0 top-1/2 -translate-y-1/2 z-[100] hidden md:flex flex-col gap-2 p-2 bg-black/40 backdrop-blur-2xl border-y border-r border-white/10 rounded-r-3xl shadow-2xl"
+    >
+      <div className="text-[9px] font-mono text-white/50 uppercase tracking-widest text-center mt-2 mb-1">Buy</div>
+      
+      <Link href="/pay?amount=499&purpose=Basic+Plan" className="group relative flex flex-col items-center justify-center w-16 h-16 rounded-2xl hover:bg-white/10 transition-colors border border-transparent hover:border-white/10 overflow-hidden">
+        <span className="text-[10px] font-medium text-white/50 group-hover:text-white transition-colors">Basic</span>
+        <span className="text-xs font-bold text-white group-hover:text-primary transition-colors">₹499</span>
+      </Link>
+
+      <Link href="/pay?amount=999&purpose=Pro+Plan" className="group relative flex flex-col items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-b from-primary/20 to-transparent border border-primary/20 hover:border-primary/50 transition-colors overflow-hidden">
+        <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <span className="text-[10px] font-medium text-primary/80 group-hover:text-primary transition-colors relative z-10">Pro</span>
+        <span className="text-xs font-bold text-white group-hover:text-white transition-colors relative z-10">₹999</span>
+      </Link>
+
+      <Link href="/pay?amount=1499&purpose=Enterprise+Plan" className="group relative flex flex-col items-center justify-center w-16 h-16 rounded-2xl hover:bg-white/10 transition-colors border border-transparent hover:border-white/10 overflow-hidden">
+        <span className="text-[10px] font-medium text-white/50 group-hover:text-white transition-colors">Ent.</span>
+        <span className="text-xs font-bold text-white group-hover:text-primary transition-colors">₹1499</span>
+      </Link>
+    </motion.div>
+  );
+};
 
 const TopNavBar = ({ activeSection }) => {
   // LANYARD TWEAK CONTROLS: Change these variables easily!
@@ -73,7 +106,7 @@ const TopNavBar = ({ activeSection }) => {
           </div>
           {/* Lanyard hangs dynamically behind the icon - NOW ONLY VISIBLE ON HOVER */}
           <div
-            className={`absolute top-1/2 left-1/2 w-screen md:w-[600px] h-[800px] transition-opacity duration-700 pointer-events-none opacity-0 group-hover/curator:opacity-100 ${activeSection ? 'opacity-0 !pointer-events-none' : 'z-[5]'}`}
+            className={`absolute top-1/2 left-1/2 w-screen md:w-[600px] h-[800px] transition-opacity duration-700 pointer-events-none opacity-0 group-hover/curator:opacity-100 ${activeSection ? 'opacity-0 !pointer-events-none' : 'z-[10000]'}`}
             style={{ transform: `translate(${lanyardXOffset}, ${lanyardYOffset})` }}
           >
             {!activeSection && <Lanyard position={[0, 5, lanyardZoom]} gravity={[0, -40, 0]} />}
@@ -87,14 +120,15 @@ const TopNavBar = ({ activeSection }) => {
 const Hero = () => {
   const shapeSizeX = 1.8;
   const shapeSizeY = 1.0;
-  const roundness  = 0.4;
+  const roundness = 0.4;
   const borderSize = 0.05;
   const circleSize = 0.3;
   const circleEdge = 0.5;
   const mouseDamping = 8;
 
   return (
-    <div className="flex flex-col content-center justify-center min-h-[100vh] relative z-10 pt-20 w-full pointer-events-none">
+    <div className="relative min-h-[100vh] w-full flex items-center justify-center">
+      {/* BACKGROUND SHAPE */}
       <div className="absolute inset-0 z-0">
         <ShapeBlur
           variation={0}
@@ -107,6 +141,38 @@ const Hero = () => {
           circleEdge={circleEdge}
           mouseDamping={mouseDamping}
         />
+      </div>
+
+      {/* CENTERED TEXT - ABSOLUTE ALIGNMENT */}
+      <div className="relative z-10 pointer-events-none">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: 1.2 }}
+          className="flex flex-col items-center gap-1.5"
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-1.5 h-1.5 bg-primary animate-pulse rotate-45" />
+            <span className="text-[9px] font-mono uppercase tracking-[0.4em] text-primary/80">Studio.v1</span>
+          </div>
+
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-[0.15em] text-white font-headline text-center leading-none">
+            <TextType
+              text="ETHEREAL STUDIOS"
+              typingSpeed={100}
+              showCursor={false}
+            />
+          </h1>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.3 }}
+            transition={{ delay: 3.0, duration: 1 }}
+            className="text-[7px] md:text-[9px] uppercase tracking-[0.6em] text-white font-medium italic mt-2"
+          >
+            Creative Intelligence
+          </motion.p>
+        </motion.div>
       </div>
     </div>
   );
@@ -224,9 +290,17 @@ const Footer = () => (
 export default function App() {
   const [activeSection, setActiveSection] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   // Preloader is now dismissed via onComplete callback from the component
   useEffect(() => {
+    // Check if we've already run the preloader in this session
+    if (sessionStorage.getItem('siteLoaded')) {
+      setIsLoading(false);
+      return;
+    }
+
+    sessionStorage.setItem('siteLoaded', 'true');
     // We can still have a failsafe timer if needed, but onComplete is preferred
     const failsafe = setTimeout(() => {
       setIsLoading(false);
@@ -245,16 +319,21 @@ export default function App() {
         setActiveSection(prev => prev === 'features' ? null : 'features');
       } else if (item.id === 'projects') {
         setActiveSection(prev => prev === 'projects' ? null : 'projects');
+      } else if (item.id === 'subscriptions') {
+        router.push('/subscriptions/');
+      } else if (item.id === 'contact') {
+        setActiveSection(prev => prev === 'contact' ? null : 'contact');
       } else {
         setActiveSection(null);
       }
     }
   }));
 
+
   return (
     <ReactLenis root>
       <div className="relative overflow-hidden bg-[#000] text-foreground selection:bg-primary/30 min-h-screen font-body">
-        
+
         {/* CUSTOM PRELOADER OVERLAY */}
         <AnimatePresence>
           {isLoading && (
@@ -270,10 +349,10 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        <SplashCursor 
-          SPLAT_RADIUS={0.25} 
-          SPLAT_FORCE={8000} 
-          DENSITY_DISSIPATION={1.4} 
+        <SplashCursor
+          SPLAT_RADIUS={0.25}
+          SPLAT_FORCE={8000}
+          DENSITY_DISSIPATION={1.4}
         />
 
         <Dock items={dockItems} />
@@ -300,35 +379,31 @@ export default function App() {
               />
 
               {/* COOL "SMALL-TO-BIG" POP ANIMATION */}
-              <motion.div 
-                initial={{ 
-                  scale: 0,
+              <motion.div
+                initial={{
+                  scale: 0.9,
                   opacity: 0,
-                  rotate: -5,
-                  filter: "blur(20px)"
+                  y: 20
                 }}
-                animate={{ 
+                animate={{
                   scale: 1,
                   opacity: 1,
-                  rotate: 0,
-                  filter: "blur(0px)"
+                  y: 0
                 }}
-                exit={{ 
-                  scale: 0,
+                exit={{
+                  scale: 0.9,
                   opacity: 0,
-                  rotate: 5,
-                  filter: "blur(20px)"
+                  y: 20
                 }}
-                transition={{ 
+                transition={{
                   type: "spring",
-                  stiffness: 200, // Fast energetic pop
-                  damping: 18,    // Elastic bounce
-                  duration: 0.5
+                  stiffness: 300,
+                  damping: 30
                 }}
-                className="relative w-full max-w-[1200px] h-[80vh] rounded-[2.5rem] overflow-hidden border border-white/20 shadow-[0_0_150px_rgba(82,39,255,0.5)] z-10 bg-[#0a0a0c]"
+                className="relative w-full max-w-[1400px] h-[85vh] rounded-[3rem] overflow-hidden border border-white/20 shadow-[0_0_200px_rgba(82,39,255,0.3)] z-10 bg-[#050508] flex flex-col"
               >
                 {/* Visual "Shimmer" sweep on entry */}
-                <motion.div 
+                <motion.div
                   initial={{ x: "-100%" }}
                   animate={{ x: "100%" }}
                   transition={{ duration: 1.5, ease: "easeInOut" }}
@@ -338,7 +413,7 @@ export default function App() {
                 {/* Ballpit Background */}
                 <div className="absolute inset-0">
                   <Ballpit
-                    count={200}
+                    count={120}
                     gravity={0.4}
                     size0={1.2}
                     minSize={0.4}
@@ -347,23 +422,78 @@ export default function App() {
                     followCursor={true}
                   />
                 </div>
-                {/* Content overlay */}
-                <div className="relative z-10 flex flex-col items-center justify-center h-full p-12 text-center">
+
+                {/* Content overlay - GLASSMORHIC LANDSCAPE CARD */}
+                <div className="relative z-10 flex-1 flex items-center justify-center p-4 md:p-8 pointer-events-none">
                   <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.6 }}
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                    className="w-full max-w-5xl bg-black/40 backdrop-blur-3xl border border-white/20 rounded-[3rem] p-8 md:p-12 pointer-events-auto shadow-2xl relative"
                   >
-                    <h2 className="text-5xl md:text-7xl font-headline font-black mb-4 text-white drop-shadow-2xl">About Me</h2>
-                    <p className="text-lg text-white/70 max-w-xl mx-auto mb-8">Creative technologist crafting immersive spatial experiences at the intersection of design and code.</p>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setActiveSection(null)}
-                      className="px-8 py-3 rounded-full glass-pearl border border-white/20 text-white font-headline text-sm uppercase tracking-widest hover:bg-white/10 transition-colors"
-                    >
-                      Close
-                    </motion.button>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+
+                      {/* Left Side: Branding */}
+                      <div className="space-y-10">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-[2px] bg-primary rounded-full" />
+                          <span className="text-[11px] font-mono uppercase tracking-[0.5em] text-primary font-black">Elite Studio</span>
+                        </div>
+
+                        <div className="space-y-6">
+                          <h2 className="text-3xl md:text-4xl lg:text-5xl font-headline font-black text-white uppercase tracking-tighter leading-[1.15]">
+                            Elite Web<br />
+                            <span className="text-primary italic">Solutions</span>
+                          </h2>
+                        </div>
+
+                        <div className="flex flex-col gap-5">
+                          <p className="text-xl md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-300">
+                            Navneet (Neet)
+                          </p>
+                          <div className="inline-block">
+                            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-white bg-primary/20 px-5 py-2.5 rounded-full border border-primary/30">
+                              Digital Solutions Architect
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Side: Content & Action */}
+                      <div className="space-y-10 flex flex-col justify-center">
+                        <div className="space-y-8">
+                          <p className="text-xl md:text-2xl text-white font-semibold leading-relaxed drop-shadow-lg">
+                            Architecting <span className="text-primary font-bold">high-performance</span> digital legacies through technical precision.
+                          </p>
+
+                          <div className="bg-white/5 rounded-2xl p-8 border border-white/10 backdrop-blur-md">
+                            <p className="text-base md:text-lg text-white leading-relaxed italic font-medium">
+                              "I provide a bespoke interactive demo for every project before any financial commitment—ensuring absolute quality and authenticity."
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center gap-8 mt-4">
+                          <motion.button
+                            whileHover={{ scale: 1.05, y: -5 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="w-full sm:w-auto px-14 py-7 rounded-[1.5rem] bg-white text-black font-headline text-xs font-black uppercase tracking-[0.3em] shadow-[0_25px_50px_rgba(255,255,255,0.2)] transition-all"
+                          >
+                            Request Demo
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.05, y: -5 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setActiveSection(null)}
+                            className="w-full sm:w-auto px-14 py-7 rounded-[1.5rem] bg-black/40 backdrop-blur-md border border-white/20 text-white font-headline text-xs font-black uppercase tracking-[0.3em] hover:bg-white/10 transition-all"
+                          >
+                            Return
+                          </motion.button>
+                        </div>
+                      </div>
+
+                    </div>
                   </motion.div>
                 </div>
               </motion.div>
@@ -372,7 +502,7 @@ export default function App() {
 
           {/* FEATURES GRID SCAN OVERLAY */}
           {activeSection === 'features' && (
-            <motion.div 
+            <motion.div
               key="features-overlay"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -383,14 +513,14 @@ export default function App() {
                 className="absolute inset-0 bg-black/50"
                 onClick={() => setActiveSection(null)}
               />
-              <motion.div 
+              <motion.div
                 initial={{ scale: 0.8, opacity: 0, rotateX: 10 }}
                 animate={{ scale: 1, opacity: 1, rotateX: 0 }}
                 exit={{ scale: 0.8, opacity: 0, rotateX: -10 }}
                 transition={{ type: "spring", stiffness: 100, damping: 20 }}
                 className="relative w-full h-full max-w-[1400px] rounded-[3rem] overflow-hidden border border-white/10 shadow-[0_0_100px_rgba(82,39,255,0.3)] bg-black"
               >
-                <GridScan 
+                <GridScan
                   className="w-full h-full"
                   scanColor="#5227ff"
                   linesColor="#1a1a24"
@@ -402,7 +532,7 @@ export default function App() {
                   enableWebcam={true}
                   showPreview={true}
                 />
-                
+
                 <div className="absolute top-12 left-12 z-20 pointer-events-none">
                   <h2 className="text-4xl font-headline font-black text-white italic tracking-tighter">SPATIAL SCANNER</h2>
                   <p className="text-white/40 text-xs font-mono tracking-widest mt-2 uppercase">Status: Tracking active... click to surge pulse.</p>
@@ -432,7 +562,7 @@ export default function App() {
                 className="absolute inset-0"
                 onClick={() => setActiveSection(null)}
               />
-              <motion.div 
+              <motion.div
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: -20 }}
@@ -450,12 +580,122 @@ export default function App() {
               </motion.div>
             </motion.div>
           )}
+
+          {activeSection === 'contact' && (
+            <motion.div
+              key="contact-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[170] flex items-center justify-center p-4 md:p-12 bg-black/95 backdrop-blur-2xl"
+            >
+              <div
+                className="absolute inset-0"
+                onClick={() => setActiveSection(null)}
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: -20 }}
+                className="relative w-full max-w-4xl bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-[0_0_100px_rgba(82,39,255,0.25)] z-10 flex flex-col items-center text-center"
+              >
+                <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 text-primary animate-pulse">
+                  <span className="material-symbols-outlined text-2xl">globe</span>
+                </div>
+
+                <h2 className="text-3xl md:text-5xl font-headline font-black text-white uppercase tracking-tight mb-2">
+                  Ethereal Network
+                </h2>
+                <p className="text-neutral-400 text-xs md:text-sm max-w-lg mb-8 leading-relaxed">
+                  Establish a secure connection. Reach out for high-end spatial visualizers, immersive 3D interfaces, and modern engineering design inquiries.
+                </p>
+
+                {/* Grid layout for contacts */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mb-8">
+                  
+                  {/* Email */}
+                  <a 
+                    href="mailto:neet@ethereal.studio"
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-neutral-400 group-hover:text-primary transition-colors">
+                      <span className="material-symbols-outlined">alternate_email</span>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Direct Email</div>
+                      <div className="text-xs text-white font-medium font-mono">neet@ethereal.studio</div>
+                    </div>
+                  </a>
+
+                  {/* Coordinates */}
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-left">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-neutral-400">
+                      <span className="material-symbols-outlined">map</span>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Coordinates</div>
+                      <div className="text-xs text-white font-medium">28.6139° N, 77.2090° E (Delhi, IN)</div>
+                    </div>
+                  </div>
+
+                  {/* Github */}
+                  <a 
+                    href="https://github.com/raagneet"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-neutral-400 group-hover:text-primary transition-colors">
+                      <span className="material-symbols-outlined">terminal</span>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Code Lab</div>
+                      <div className="text-xs text-white font-medium font-mono">github.com/raagneet</div>
+                    </div>
+                  </a>
+
+                  {/* Availability */}
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-left">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-neutral-400">
+                      <span className="material-symbols-outlined">calendar_today</span>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Availability</div>
+                      <div className="text-xs text-emerald-400 font-bold uppercase tracking-wider">Accepting Demos</div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <motion.a
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    href="mailto:neet@ethereal.studio"
+                    className="px-8 py-4 rounded-2xl bg-white text-black font-headline font-black text-xs uppercase tracking-wider"
+                  >
+                    Send Direct Message
+                  </motion.a>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setActiveSection(null)}
+                    className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-headline font-black text-xs uppercase tracking-wider hover:bg-white/10 transition-colors"
+                  >
+                    Dismiss Terminal
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+
         </AnimatePresence>
+
+        {!activeSection && <Hero />}
 
         {/* Main Content */}
         <main className="relative px-6 md:px-12 pb-32 min-h-screen z-10 w-full mx-auto max-w-[1600px]">
-          {/* Only show Hero (ShapeBlur) when NO overlay is active */}
-          {!activeSection && <Hero />}
           <SpatialGrid />
 
           <motion.div

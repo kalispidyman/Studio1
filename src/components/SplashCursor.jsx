@@ -8,7 +8,7 @@ function SplashCursor({
   DENSITY_DISSIPATION = 2,
   VELOCITY_DISSIPATION = 3,
   PRESSURE = 0.2,
-  PRESSURE_ITERATIONS = 12,
+  PRESSURE_ITERATIONS = 8,
   CURL = 4,
   SPLAT_RADIUS = 0.15,
   SPLAT_FORCE = 6000,
@@ -963,7 +963,7 @@ function SplashCursor({
     }
 
     function scaleByPixelRatio(input) {
-      const pixelRatio = window.devicePixelRatio || 1;
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
       return Math.floor(input * pixelRatio);
     }
 

@@ -206,7 +206,8 @@ const ShapeBlur = ({
       if (!active) return;
       w = mount.clientWidth;
       h = mount.clientHeight;
-      const dpr = Math.min(window.devicePixelRatio, 2);
+      // Optimize: Cap pixel ratio to 1.5 for performance booster
+      const dpr = Math.min(window.devicePixelRatio, 1.5);
 
       renderer.setSize(w, h);
       renderer.setPixelRatio(dpr);

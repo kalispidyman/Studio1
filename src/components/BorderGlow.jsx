@@ -10,11 +10,8 @@ function buildBoxShadow(glowColor, intensity) {
   const { h, s, l } = parseHSL(glowColor);
   const base = `${h}deg ${s}% ${l}%`;
   const layers = [
-    [0, 0, 0, 1, 100, true], [0, 0, 1, 0, 60, true], [0, 0, 3, 0, 50, true],
-    [0, 0, 6, 0, 40, true], [0, 0, 15, 0, 30, true], [0, 0, 25, 2, 20, true],
-    [0, 0, 50, 2, 10, true],
-    [0, 0, 1, 0, 60, false], [0, 0, 3, 0, 50, false], [0, 0, 6, 0, 40, false],
-    [0, 0, 15, 0, 30, false], [0, 0, 25, 2, 20, false], [0, 0, 50, 2, 10, false],
+    [0, 0, 0, 1, 100, true], [0, 0, 10, 0, 40, true],
+    [0, 0, 1, 0, 60, false], [0, 0, 20, 2, 20, false],
   ];
   return layers.map(([x, y, blur, spread, alpha, inset]) => {
     const a = Math.min(alpha * intensity, 100);

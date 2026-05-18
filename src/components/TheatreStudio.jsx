@@ -8,7 +8,6 @@ import extension from '@theatre/r3f/dist/extension';
 if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   studio.initialize();
   studio.extend(extension);
-  // Start hidden by default
   if (studio.ui) studio.ui.hide();
 }
 

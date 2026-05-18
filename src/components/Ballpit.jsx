@@ -643,7 +643,7 @@ class Z extends d {
     this.physics.update(e);
     for (let idx = 0; idx < this.count; idx++) {
       U.position.fromArray(this.physics.positionData, 3 * idx);
-      if (idx === 0 && this.config.followCursor === false) {
+      if (idx === 0) {
         U.scale.setScalar(0);
       } else {
         U.scale.setScalar(this.physics.sizeData[idx]);
@@ -660,7 +660,8 @@ function createBallpit(e, t = {}) {
   const i = new x({
     canvas: e,
     size: 'parent',
-    rendererOptions: { antialias: true, alpha: true }
+    maxPixelRatio: 1.5,
+    rendererOptions: { antialias: false, alpha: true, powerPreference: 'high-performance' }
   });
   let s;
   i.renderer.toneMapping = v;

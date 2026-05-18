@@ -25,8 +25,10 @@ export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], 
         gl={{ alpha: transparent }}
         onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
-        <ambientLight intensity={Math.PI} />
-        <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
+        <ambientLight intensity={2} />
+        <spotLight position={[0, 10, 10]} angle={0.15} penumbra={1} intensity={20} castShadow />
+        <pointLight position={[-10, 0, -20]} color="blue" intensity={10} />
+        <Physics gravity={gravity} timeStep={isMobile ? 1 / 60 : 1 / 120} interpolate={true}>
           <Band isMobile={isMobile} />
         </Physics>
         <Environment blur={0.75}>
@@ -43,7 +45,7 @@ export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], 
 function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
   const band = useRef(), fixed = useRef(), j1 = useRef(), j2 = useRef(), j3 = useRef(), card = useRef();
   const vec = new THREE.Vector3(), ang = new THREE.Vector3(), rot = new THREE.Vector3(), dir = new THREE.Vector3();
-  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
+  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 6, linearDamping: 4 };
 
   // Create a procedural beautiful strap texture
   const texture = useMemo(() => {
@@ -157,20 +159,38 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
             <group position={[0, 0.3, 0]}>
               <mesh>
                 <boxGeometry args={[0.7, 1.2, 0.02]} />
-                <meshPhysicalMaterial color="#0a0a0c" clearcoat={isMobile ? 0 : 1} clearcoatRoughness={0.15} roughness={0.2} metalness={0.8} />
+                <meshPhysicalMaterial 
+                  color="#0a0a0c" 
+                  clearcoat={1} 
+                  clearcoatRoughness={0.1} 
+                  roughness={0.3} 
+                  metalness={0.9} 
+                  emissive="#1a1a24"
+                  emissiveIntensity={0.2}
+                />
               </mesh>
               {/* Card Details */}
-              <Text position={[0, 0.35, 0.015]} fontSize={0.06} color="#b4b1d2" anchorX="center" anchorY="middle">
+              <Text position={[0, 0.45, 0.015]} fontSize={0.06} color="#b4b1d2" anchorX="center" anchorY="middle">
                 E T H E R E A L
               </Text>
-              <Text position={[0, 0.1, 0.015]} fontSize={0.25} color="#5227FF" anchorX="center" anchorY="middle">
+              <Text position={[0, 0.35, 0.015]} fontSize={0.04} color="#888" anchorX="center" anchorY="middle">
+                S T U D I O S
+              </Text>
+              <Text position={[0, 0.05, 0.015]} fontSize={0.35} color="#5227FF" anchorX="center" anchorY="middle">
                 ∞
               </Text>
-              <Text position={[0, -0.2, 0.015]} fontSize={0.04} color="#ffffff" anchorX="center" anchorY="middle">
-                GUEST ACCESS
+              <mesh position={[0, 0.05, 0.01]}>
+                <sphereGeometry args={[0.2, 32, 32]} />
+                <meshBasicMaterial color="#5227FF" transparent opacity={0.1} />
+              </mesh>
+              <Text position={[0, -0.25, 0.015]} fontSize={0.05} color="#ffffff" anchorX="center" anchorY="middle">
+                CORE DIRECTOR
               </Text>
-              <Text position={[0, -0.35, 0.015]} fontSize={0.03} color="#888888" anchorX="center" anchorY="middle">
-                ID: 404-XYZ-VOID
+              <Text position={[0, -0.4, 0.015]} fontSize={0.03} color="#5227FF" anchorX="center" anchorY="middle" opacity={0.8}>
+                ID: 8472-A-99
+              </Text>
+              <Text position={[0, -0.5, 0.015]} fontSize={0.02} color="#444" anchorX="center" anchorY="middle">
+                SECURED ACCESS
               </Text>
             </group>
             {/* Clip */}

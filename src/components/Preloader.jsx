@@ -111,7 +111,12 @@ const EtherealPreloader = ({ onComplete }) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[1000] flex flex-col md:flex-row w-full h-full bg-[#050508] overflow-hidden font-body">
+    <div 
+      className="fixed inset-0 z-[1000] flex flex-col md:flex-row w-full h-full overflow-hidden font-body"
+      style={{ 
+        background: 'radial-gradient(circle at center, #0c0c1e 0%, #050508 100%)'
+      }}
+    >
       {/* LEFT SIDE: Typography & Progress */}
       <div className="relative flex-1 flex flex-col justify-between p-12 md:p-24 z-20 border-r border-white/5">
         <div className="overflow-hidden">
@@ -187,8 +192,8 @@ const EtherealPreloader = ({ onComplete }) => {
       </div>
 
       {/* Background Decorative Elements */}
-      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[20%] w-[30%] h-[30%] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-[-10%] right-[-5%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] left-[10%] w-[40%] h-[40%] bg-[#5227ff]/20 rounded-full blur-[100px] pointer-events-none" style={{ animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
     </div>
   );
 };

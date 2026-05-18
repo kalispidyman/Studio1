@@ -13,8 +13,10 @@ const LiquidBackground = () => {
 
     let width, height;
     const resize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
+      // PERFORMANCE BOOST: Render background at 0.5x resolution
+      const dpr = 0.5;
+      width = window.innerWidth * dpr;
+      height = window.innerHeight * dpr;
       canvas.width = width;
       canvas.height = height;
     };
