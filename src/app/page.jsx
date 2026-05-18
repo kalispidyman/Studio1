@@ -322,12 +322,13 @@ export default function App() {
       } else if (item.id === 'subscriptions') {
         router.push('/subscriptions/');
       } else if (item.id === 'contact') {
-        setActiveSection(prev => prev === 'contact' ? null : 'contact');
+        router.push('/contact/');
       } else {
         setActiveSection(null);
       }
     }
   }));
+
 
 
   return (
@@ -581,114 +582,6 @@ export default function App() {
             </motion.div>
           )}
 
-          {activeSection === 'contact' && (
-            <motion.div
-              key="contact-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[170] flex items-center justify-center p-4 md:p-12 bg-black/95 backdrop-blur-2xl"
-            >
-              <div
-                className="absolute inset-0"
-                onClick={() => setActiveSection(null)}
-              />
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: -20 }}
-                className="relative w-full max-w-4xl bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-[0_0_100px_rgba(82,39,255,0.25)] z-10 flex flex-col items-center text-center"
-              >
-                <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 text-primary animate-pulse">
-                  <span className="material-symbols-outlined text-2xl">globe</span>
-                </div>
-
-                <h2 className="text-3xl md:text-5xl font-headline font-black text-white uppercase tracking-tight mb-2">
-                  Ethereal Network
-                </h2>
-                <p className="text-neutral-400 text-xs md:text-sm max-w-lg mb-8 leading-relaxed">
-                  Establish a secure connection. Reach out for high-end spatial visualizers, immersive 3D interfaces, and modern engineering design inquiries.
-                </p>
-
-                {/* Grid layout for contacts */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mb-8">
-                  
-                  {/* Email */}
-                  <a 
-                    href="mailto:neet@ethereal.studio"
-                    className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-neutral-400 group-hover:text-primary transition-colors">
-                      <span className="material-symbols-outlined">alternate_email</span>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Direct Email</div>
-                      <div className="text-xs text-white font-medium font-mono">neet@ethereal.studio</div>
-                    </div>
-                  </a>
-
-                  {/* Coordinates */}
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-left">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-neutral-400">
-                      <span className="material-symbols-outlined">map</span>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Coordinates</div>
-                      <div className="text-xs text-white font-medium">28.6139° N, 77.2090° E (Delhi, IN)</div>
-                    </div>
-                  </div>
-
-                  {/* Github */}
-                  <a 
-                    href="https://github.com/raagneet"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-neutral-400 group-hover:text-primary transition-colors">
-                      <span className="material-symbols-outlined">terminal</span>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Code Lab</div>
-                      <div className="text-xs text-white font-medium font-mono">github.com/raagneet</div>
-                    </div>
-                  </a>
-
-                  {/* Availability */}
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-left">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-neutral-400">
-                      <span className="material-symbols-outlined">calendar_today</span>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Availability</div>
-                      <div className="text-xs text-emerald-400 font-bold uppercase tracking-wider">Accepting Demos</div>
-                    </div>
-                  </div>
-
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <motion.a
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    href="mailto:neet@ethereal.studio"
-                    className="px-8 py-4 rounded-2xl bg-white text-black font-headline font-black text-xs uppercase tracking-wider"
-                  >
-                    Send Direct Message
-                  </motion.a>
-                  
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setActiveSection(null)}
-                    className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-headline font-black text-xs uppercase tracking-wider hover:bg-white/10 transition-colors"
-                  >
-                    Dismiss Terminal
-                  </motion.button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
 
         </AnimatePresence>
 
